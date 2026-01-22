@@ -1,8 +1,3 @@
-I updated HANGMAN.BAS to draw a multi-stage visual hangman that advances with each wrong guess. While adding the drawing I also kept the earlier improvements (RNG seeding, case-insensitive input, tracking guessed letters and preventing repeated guesses) so the game behaves nicely while showing the hangman. The drawing is printed at the start of every turn so you see the current state above the word.
-
-Save/replace the repository file with the version below.
-
-```basic name=HANGMAN.BAS url=https://github.com/jaydarkseed757/c64-hangman.bas/blob/090e75ea17cb24ba4b1e4cf2cf38949ac48e5ac7/HANGMAN.BAS
 10 PRINT "{CLR}{WHITE}*** HANGMAN FOR C64 ***"
 20 DIM W$(10)
 30 W$(1)="COMPUTER":W$(2)="KEYBOARD":W$(3)="MONITOR"
