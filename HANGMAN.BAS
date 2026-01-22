@@ -1,3 +1,8 @@
+I updated HANGMAN.BAS to draw a multi-stage visual hangman that advances with each wrong guess. While adding the drawing I also kept the earlier improvements (RNG seeding, case-insensitive input, tracking guessed letters and preventing repeated guesses) so the game behaves nicely while showing the hangman. The drawing is printed at the start of every turn so you see the current state above the word.
+
+Save/replace the repository file with the version below.
+
+```basic name=HANGMAN.BAS url=https://github.com/jaydarkseed757/c64-hangman.bas/blob/090e75ea17cb24ba4b1e4cf2cf38949ac48e5ac7/HANGMAN.BAS
 10 PRINT "{CLR}{WHITE}*** HANGMAN FOR C64 ***"
 20 DIM W$(10)
 30 W$(1)="COMPUTER":W$(2)="KEYBOARD":W$(3)="MONITOR"
@@ -5,7 +10,8 @@
 50 W$(7)="SPRITES":W$(8)="GRAPHICS":W$(9)="MEMORY"
 60 W$(10)="COMMODORE"
 
-70 REM --- PICK RANDOM WORD ---
+70 REM --- SEED RNG AND PICK RANDOM WORD ---
+75 RND(-1)
 80 N=INT(RND(1)*10)+1
 90 A$=W$(N)
 100 L=LEN(A$)
@@ -15,28 +21,58 @@
 130 FOR I=1 TO L:B$=B$+"-":NEXT
 
 140 G=6:REM GUESSES LEFT
-150 PRINT "{CLR}"
-160 PRINT "WORD: ";B$
-170 PRINT "GUESSES LEFT:";G
-180 PRINT "ENTER LETTER:";
-190 INPUT Q$
-200 IF LEN(Q$)<>1 THEN 180
+145 GS$="" : REM guessed letters
 
-210 Q$=LEFT$(Q$,1)
-220 FOUND=0
+150 REM --- MAIN LOOP ---
+160 GOSUB 900 : REM draw hangman (clears screen)
+170 PRINT "WORD: ";B$
+180 PRINT "GUESSES LEFT:";G
+185 PRINT "GUESSED: ";GS$
+190 PRINT "ENTER LETTER:";
+200 INPUT Q$
+210 IF LEN(Q$)<>1 THEN 190
 
-230 REM --- CHECK LETTER ---
-240 FOR I=1 TO L
-250 IF MID$(A$,I,1)=Q$ THEN MID$(B$,I,1)=Q$:FOUND=1
-260 NEXT
+220 Q$=LEFT$(Q$,1)
+230 REM --- convert lowercase to uppercase if needed ---
+240 C=ASC(Q$)
+250 IF C>=97 AND C<=122 THEN Q$=CHR$(C-32)
 
-270 IF FOUND=0 THEN G=G-1
+260 REM --- CHECK IF ALREADY GUESSED ---
+270 ALR=0
+280 FOR J=1 TO LEN(GS$)
+290 IF MID$(GS$,J,1)=Q$ THEN ALR=1
+300 NEXT
+310 IF ALR=1 THEN PRINT "ALREADY GUESSED.":GOTO 160
 
-280 PRINT "{CLR}"
-290 PRINT "WORD: ";B$
-300 PRINT "GUESSES LEFT:";G
+320 GS$=GS$+Q$
 
-310 IF B$=A$ THEN PRINT "YOU WIN!":END
-320 IF G=0 THEN PRINT "YOU LOSE! WORD WAS ";A$:END
+330 FOUND=0
+340 REM --- CHECK LETTER ---
+350 FOR I=1 TO L
+360 IF MID$(A$,I,1)=Q$ THEN MID$(B$,I,1)=Q$:FOUND=1
+370 NEXT
 
-330 GOTO 170
+380 IF FOUND=0 THEN G=G-1
+
+390 IF B$=A$ THEN GOSUB 900:PRINT "WORD: ";B$:PRINT "YOU WIN!":END
+400 IF G=0 THEN GOSUB 900:PRINT "WORD: ";B$:PRINT "YOU LOSE! WORD WAS ";A$:END
+
+410 GOTO 160
+
+900 REM --- DRAW HANGMAN BASED ON WRONG GUESSES ---
+910 PRINT "{CLR}"
+920 WRONG=6-G
+930 PRINT " +---+"
+940 PRINT " |   |"
+950 IF WRONG<1 THEN PRINT "     |" ELSE PRINT " O   |"
+960 IF WRONG<2 THEN PRINT "     |" : GOTO 980
+970 IF WRONG=2 THEN PRINT " |   |" : GOTO 980
+975 IF WRONG=3 THEN PRINT "/|   |" : GOTO 980
+977 PRINT "/|\  |"
+980 IF WRONG<5 THEN PRINT "     |" : GOTO 1000
+990 IF WRONG=5 THEN PRINT "/    |" : GOTO 1000
+995 PRINT "/ \  |"
+1000 PRINT "     |"
+1010 PRINT "======="
+1020 RETURN
+```
